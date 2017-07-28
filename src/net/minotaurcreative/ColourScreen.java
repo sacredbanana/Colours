@@ -1,8 +1,6 @@
 package net.minotaurcreative;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.*;
 
 public class ColourScreen extends JPanel {
@@ -14,13 +12,11 @@ public class ColourScreen extends JPanel {
     private boolean greenGradientUp = true;
 
     public ColourScreen() {
-        Timer timer = new Timer(1, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                cycle += cycleSpeed;
-                if (cycle > 255)
-                    cycle = 0;
-                repaint();
-            }
+        Timer timer = new Timer(1, e -> {
+            cycle += cycleSpeed;
+            if (cycle > 255)
+                cycle = 0;
+            repaint();
         });
         timer.start();
     }
@@ -33,24 +29,23 @@ public class ColourScreen extends JPanel {
         int coordY = 0;
 
         for (int rawRed = 7; rawRed <= 255; rawRed += 8) {
+            int red = rawRed + cycle;
+            if (red > 255)
+                red -= 255;
             if (greenGradientUp || !smooth) {
                 for (int rawGreen = 7; rawGreen <= 255; rawGreen += 8) {
+                    int green = rawGreen + cycle;
+                    if (green > 255)
+                        green -= 255;
                     if (blueGradientUp || !smooth) {
                         for (int rawBlue = 7; rawBlue <= 255; rawBlue += 8) {
-                            int red = rawRed + cycle;
-                            if (red > 255)
-                                red -= 255;
-                            int green = rawGreen + cycle;
-                            if (green > 255)
-                                green -= 255;
                             int blue = rawBlue + cycle;
                             if (blue > 255)
                                 blue -= 255;
                             g.setColor(new Color(red,green,blue));
                             int BLOCK_SIZE = getWidth()*getHeight()/TOTAL_COLOURS;
-                            int blockWidth = 1;
                             int blockHeight = BLOCK_SIZE;
-                            g.fillRect(coordX*blockWidth,coordY*blockHeight,blockWidth,blockHeight);
+                            g.fillRect(coordX,coordY*blockHeight,1,blockHeight);
                             if (++coordX > getWidth()) {
                                 coordX = 0;
                                 coordY++;
@@ -58,20 +53,13 @@ public class ColourScreen extends JPanel {
                         }
                     } else {
                         for (int rawBlue = 255; rawBlue >= 7; rawBlue -= 8) {
-                            int red = rawRed + cycle;
-                            if (red > 255)
-                                red -= 255;
-                            int green = rawGreen + cycle;
-                            if (green > 255)
-                                green -= 255;
                             int blue = rawBlue + cycle;
                             if (blue > 255)
                                 blue -= 255;
                             g.setColor(new Color(red, green, blue));
-                            int BLOCK_SIZE = getWidth() * getHeight() / TOTAL_COLOURS;
-                            int blockWidth = 1;
-                            int blockHeight = BLOCK_SIZE;
-                            g.fillRect(coordX * blockWidth, coordY * blockHeight, blockWidth, blockHeight);
+                            int blockSize = getWidth() * getHeight() / TOTAL_COLOURS;
+                            int blockHeight = blockSize;
+                            g.fillRect(coordX, coordY * blockHeight, 1, blockHeight);
                             if (++coordX > getWidth()) {
                                 coordX = 0;
                                 coordY++;
@@ -82,22 +70,18 @@ public class ColourScreen extends JPanel {
                 }
             } else {
                 for (int rawGreen = 255; rawGreen >= 7; rawGreen -= 8) {
+                    int green = rawGreen + cycle;
+                    if (green > 255)
+                        green -= 255;
                     if (blueGradientUp || !smooth) {
                         for (int rawBlue = 7; rawBlue <= 255; rawBlue += 8) {
-                            int red = rawRed + cycle;
-                            if (red > 255)
-                                red -= 255;
-                            int green = rawGreen + cycle;
-                            if (green > 255)
-                                green -= 255;
                             int blue = rawBlue + cycle;
                             if (blue > 255)
                                 blue -= 255;
                             g.setColor(new Color(red,green,blue));
                             int BLOCK_SIZE = getWidth()*getHeight()/TOTAL_COLOURS;
-                            int blockWidth = 1;
                             int blockHeight = BLOCK_SIZE;
-                            g.fillRect(coordX*blockWidth,coordY*blockHeight,blockWidth,blockHeight);
+                            g.fillRect(coordX,coordY*blockHeight,1,blockHeight);
                             if (++coordX > getWidth()) {
                                 coordX = 0;
                                 coordY++;
@@ -105,20 +89,13 @@ public class ColourScreen extends JPanel {
                         }
                     } else {
                         for (int rawBlue = 255; rawBlue >= 7; rawBlue -= 8) {
-                            int red = rawRed + cycle;
-                            if (red > 255)
-                                red -= 255;
-                            int green = rawGreen + cycle;
-                            if (green > 255)
-                                green -= 255;
                             int blue = rawBlue + cycle;
                             if (blue > 255)
                                 blue -= 255;
                             g.setColor(new Color(red, green, blue));
                             int BLOCK_SIZE = getWidth() * getHeight() / TOTAL_COLOURS;
-                            int blockWidth = 1;
                             int blockHeight = BLOCK_SIZE;
-                            g.fillRect(coordX * blockWidth, coordY * blockHeight, blockWidth, blockHeight);
+                            g.fillRect(coordX, coordY * blockHeight,1, blockHeight);
                             if (++coordX > getWidth()) {
                                 coordX = 0;
                                 coordY++;
@@ -137,7 +114,7 @@ public class ColourScreen extends JPanel {
     }
 
     public void decreaseCycleSpeed() {
-        if (--cycleSpeed < 0) {
+        if (--cycleSpeed <=  0) {
             cycleSpeed = 0;
             cycle = 0;
         }

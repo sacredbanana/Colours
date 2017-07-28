@@ -7,7 +7,7 @@ import java.awt.event.KeyListener;
 public class Main {
 
     public static void main(String[] args) {
-        final int SCREEN_WIDTH = 256*3;
+        final int SCREEN_WIDTH = 256*6;
         final int SCREEN_HEIGHT = 128*6;
         JFrame frame = new JFrame("Colours!");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
