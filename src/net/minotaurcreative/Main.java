@@ -4,13 +4,13 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class Main {
+class Main {
 
     public static void main(String[] args) {
         final int SCREEN_WIDTH = 256*6;
         final int SCREEN_HEIGHT = 128*6;
         JFrame frame = new JFrame("Colours!");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ColourScreen colourScreen = new ColourScreen();
         frame.add(colourScreen);
         frame.addKeyListener(new KeyListener() {

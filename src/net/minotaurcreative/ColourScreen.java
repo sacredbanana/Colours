@@ -3,15 +3,16 @@ package net.minotaurcreative;
 import java.awt.*;
 import javax.swing.*;
 
-public class ColourScreen extends JPanel {
-    private final int TOTAL_COLOURS = 32768;
+@SuppressWarnings("SpellCheckingInspection")
+
+class ColourScreen extends JPanel {
     private int cycle = 0;
     private int cycleSpeed = 0;
     private boolean smooth = false;
     private boolean blueGradientUp = true;
     private boolean greenGradientUp = true;
 
-    public ColourScreen() {
+    ColourScreen() {
         Timer timer = new Timer(1, e -> {
             cycle += cycleSpeed;
             if (cycle > 255)
@@ -25,6 +26,7 @@ public class ColourScreen extends JPanel {
         super.paintComponent(g);
         this.setBackground(Color.BLACK);
 
+        final int TOTAL_COLOURS = 32768;
         int coordX = 0;
         int coordY = 0;
 
@@ -43,9 +45,7 @@ public class ColourScreen extends JPanel {
                             if (blue > 255)
                                 blue -= 255;
                             g.setColor(new Color(red,green,blue));
-                            int BLOCK_SIZE = getWidth()*getHeight()/TOTAL_COLOURS;
-                            int blockHeight = BLOCK_SIZE;
-                            g.fillRect(coordX,coordY*blockHeight,1,blockHeight);
+                            g.fillRect(coordX,coordY* getWidth()*getHeight()/ TOTAL_COLOURS,1, getWidth()*getHeight()/ TOTAL_COLOURS);
                             if (++coordX > getWidth()) {
                                 coordX = 0;
                                 coordY++;
@@ -57,9 +57,7 @@ public class ColourScreen extends JPanel {
                             if (blue > 255)
                                 blue -= 255;
                             g.setColor(new Color(red, green, blue));
-                            int blockSize = getWidth() * getHeight() / TOTAL_COLOURS;
-                            int blockHeight = blockSize;
-                            g.fillRect(coordX, coordY * blockHeight, 1, blockHeight);
+                            g.fillRect(coordX, coordY * getWidth() * getHeight() / TOTAL_COLOURS, 1, getWidth() * getHeight() / TOTAL_COLOURS);
                             if (++coordX > getWidth()) {
                                 coordX = 0;
                                 coordY++;
@@ -79,9 +77,7 @@ public class ColourScreen extends JPanel {
                             if (blue > 255)
                                 blue -= 255;
                             g.setColor(new Color(red,green,blue));
-                            int BLOCK_SIZE = getWidth()*getHeight()/TOTAL_COLOURS;
-                            int blockHeight = BLOCK_SIZE;
-                            g.fillRect(coordX,coordY*blockHeight,1,blockHeight);
+                            g.fillRect(coordX,coordY* getWidth()*getHeight()/ TOTAL_COLOURS,1, getWidth()*getHeight()/ TOTAL_COLOURS);
                             if (++coordX > getWidth()) {
                                 coordX = 0;
                                 coordY++;
@@ -93,9 +89,7 @@ public class ColourScreen extends JPanel {
                             if (blue > 255)
                                 blue -= 255;
                             g.setColor(new Color(red, green, blue));
-                            int BLOCK_SIZE = getWidth() * getHeight() / TOTAL_COLOURS;
-                            int blockHeight = BLOCK_SIZE;
-                            g.fillRect(coordX, coordY * blockHeight,1, blockHeight);
+                            g.fillRect(coordX, coordY * getWidth() * getHeight() / TOTAL_COLOURS,1, getWidth() * getHeight() / TOTAL_COLOURS);
                             if (++coordX > getWidth()) {
                                 coordX = 0;
                                 coordY++;
@@ -109,18 +103,18 @@ public class ColourScreen extends JPanel {
         }
     }
 
-    public void increaseCycleSpeed() {
+    void increaseCycleSpeed() {
         cycleSpeed++;
     }
 
-    public void decreaseCycleSpeed() {
+    void decreaseCycleSpeed() {
         if (--cycleSpeed <=  0) {
             cycleSpeed = 0;
             cycle = 0;
         }
     }
 
-    public void toggleSmoothGradients() {
+    void toggleSmoothGradients() {
         smooth = !smooth;
     }
 }
