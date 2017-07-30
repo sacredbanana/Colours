@@ -7,9 +7,10 @@ import java.awt.event.KeyListener;
 class Main {
 
     public static void main(String[] args) {
-        final int SCREEN_WIDTH = 1200;
-        final int SCREEN_HEIGHT = 750;
+        final int SCREEN_WIDTH = 1280;
+        final int SCREEN_HEIGHT = 800;
         JFrame frame = new JFrame("Colours!");
+        frame.setResizable(false);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ColourScreen colourScreen = new ColourScreen();
         frame.add(colourScreen);
@@ -20,7 +21,7 @@ class Main {
                 System.out.println("Key pressed code=" + e.getKeyCode() + ", char=" + e.getKeyChar());
                 switch (e.getKeyCode()) {
                     case 32:
-                        colourScreen.toggleSmoothGradients();
+                        colourScreen.switchAlgortithm();
                         break;
                     case 38:
                         colourScreen.increaseCycleSpeed();
