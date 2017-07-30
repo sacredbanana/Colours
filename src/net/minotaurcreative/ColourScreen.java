@@ -2,17 +2,22 @@ package net.minotaurcreative;
 
 import java.awt.*;
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Random;
 
-@SuppressWarnings("SpellCheckingInspection")
-
-class ColourScreen extends JPanel {
+public class ColourScreen extends JPanel {
+    private final int TOTAL_COLOURS = 32768;
     private int cycle = 0;
     private int cycleSpeed = 0;
+    private ArrayList<Color> colours;
     private boolean smooth = false;
     private boolean blueGradientUp = true;
     private boolean greenGradientUp = true;
 
-    ColourScreen() {
+    public ColourScreen() {
+        colours = new ArrayList<Color>(TOTAL_COLOURS);
+        addColours();
+        randomSpread();
         Timer timer = new Timer(1, e -> {
             cycle += cycleSpeed;
             if (cycle > 255)
@@ -26,10 +31,26 @@ class ColourScreen extends JPanel {
         super.paintComponent(g);
         this.setBackground(Color.BLACK);
 
-        final int TOTAL_COLOURS = 32768;
+
+
         int coordX = 0;
         int coordY = 0;
 
+        for (Color colour : colours) {
+            g.setColor(colour);
+            int BLOCK_SIZE = getWidth() * getHeight() / TOTAL_COLOURS;
+            int blockWidth = 5;//getWidth() / 256;
+            int blockHeight = 5;// getHeight() / 128;// BLOCK_SIZE;
+            g.fillRect(coordX * blockWidth, coordY * blockHeight,blockWidth, blockHeight);
+            if ((++coordX * blockWidth + blockWidth) > getWidth()) {
+                coordX = 0;
+                coordY++;
+            }
+        }
+        //colours.clear();
+    }
+
+    private void addColours() {
         for (int rawRed = 7; rawRed <= 255; rawRed += 8) {
             int red = rawRed + cycle;
             if (red > 255)
@@ -44,24 +65,16 @@ class ColourScreen extends JPanel {
                             int blue = rawBlue + cycle;
                             if (blue > 255)
                                 blue -= 255;
-                            g.setColor(new Color(red,green,blue));
-                            g.fillRect(coordX,coordY* getWidth()*getHeight()/ TOTAL_COLOURS,1, getWidth()*getHeight()/ TOTAL_COLOURS);
-                            if (++coordX > getWidth()) {
-                                coordX = 0;
-                                coordY++;
-                            }
+                            Color colour = new Color(red, green, blue);
+                            colours.add(colour);
                         }
                     } else {
                         for (int rawBlue = 255; rawBlue >= 7; rawBlue -= 8) {
                             int blue = rawBlue + cycle;
                             if (blue > 255)
                                 blue -= 255;
-                            g.setColor(new Color(red, green, blue));
-                            g.fillRect(coordX, coordY * getWidth() * getHeight() / TOTAL_COLOURS, 1, getWidth() * getHeight() / TOTAL_COLOURS);
-                            if (++coordX > getWidth()) {
-                                coordX = 0;
-                                coordY++;
-                            }
+                            Color colour = new Color(red, green, blue);
+                            colours.add(colour);
                         }
                     }
                     blueGradientUp = !blueGradientUp;
@@ -76,24 +89,16 @@ class ColourScreen extends JPanel {
                             int blue = rawBlue + cycle;
                             if (blue > 255)
                                 blue -= 255;
-                            g.setColor(new Color(red,green,blue));
-                            g.fillRect(coordX,coordY* getWidth()*getHeight()/ TOTAL_COLOURS,1, getWidth()*getHeight()/ TOTAL_COLOURS);
-                            if (++coordX > getWidth()) {
-                                coordX = 0;
-                                coordY++;
-                            }
+                            Color colour = new Color(red, green, blue);
+                            colours.add(colour);
                         }
                     } else {
                         for (int rawBlue = 255; rawBlue >= 7; rawBlue -= 8) {
                             int blue = rawBlue + cycle;
                             if (blue > 255)
                                 blue -= 255;
-                            g.setColor(new Color(red, green, blue));
-                            g.fillRect(coordX, coordY * getWidth() * getHeight() / TOTAL_COLOURS,1, getWidth() * getHeight() / TOTAL_COLOURS);
-                            if (++coordX > getWidth()) {
-                                coordX = 0;
-                                coordY++;
-                            }
+                            Color colour = new Color(red, green, blue);
+                            colours.add(colour);
                         }
                     }
                     blueGradientUp = !blueGradientUp;
@@ -103,18 +108,29 @@ class ColourScreen extends JPanel {
         }
     }
 
-    void increaseCycleSpeed() {
+    private void randomSpread() {
+        Random randomGenerator = new Random();
+        for (int i = 0; i < colours.size(); i++) {
+            Color colour = colours.get(i);
+            int randomIndex = randomGenerator.nextInt(colours.size());
+            Color colourSwapped = colours.get(randomIndex);
+            colours.set(randomIndex, colour);
+            colours.set(i, colourSwapped);
+        }
+    }
+
+    public void increaseCycleSpeed() {
         cycleSpeed++;
     }
 
-    void decreaseCycleSpeed() {
+    public void decreaseCycleSpeed() {
         if (--cycleSpeed <=  0) {
             cycleSpeed = 0;
             cycle = 0;
         }
     }
 
-    void toggleSmoothGradients() {
+    public void toggleSmoothGradients() {
         smooth = !smooth;
     }
 }
