@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Random;
 
 public class ColourScreen extends JPanel {
@@ -12,17 +13,13 @@ public class ColourScreen extends JPanel {
     private int currentAlgorithm = 0;
     private int cycle = 0;
     private int cycleSpeed = 0;
-    private ArrayList<Color> colours;
+    private ArrayList<PositionedColour> colours;
     private boolean blueGradientUp = true;
     private boolean greenGradientUp = true;
 
     public ColourScreen() {
-        colours = new ArrayList<Color>(TOTAL_COLOURS);
+        colours = new ArrayList<>(TOTAL_COLOURS);
         standard();
-        //smooth();
-        //colourCubeRun();
-        //randomSpread();
-        //clumpColours();
         Timer timer = new Timer(1, e -> {
             cycle += cycleSpeed;
             if (cycle > 255)
@@ -36,10 +33,9 @@ public class ColourScreen extends JPanel {
         super.paintComponent(g);
         this.setBackground(Color.BLACK);
 
-        int coordX = 0;
-        int coordY = 0;
-
-        for (Color colour : colours) {
+        for (PositionedColour colour : colours) {
+            int coordX = colour.xPos;
+            int coordY = colour.yPos;
             int red = colour.getRed() + cycle;
             if (red > 255)
                 red -= 255;
@@ -51,22 +47,23 @@ public class ColourScreen extends JPanel {
                 blue -= 255;
             Color adjustedColour = new Color(red, green, blue);
             g.setColor(adjustedColour);
-            int BLOCK_SIZE = getWidth() * getHeight() / TOTAL_COLOURS;
             int blockWidth = 5;//getWidth() / 256;
             int blockHeight = 6;// getHeight() / 128;// BLOCK_SIZE;
-            g.fillRect(coordX * blockWidth, coordY * blockHeight,blockWidth, blockHeight);
-            if ((++coordX * blockWidth) >= 1280) {
-                coordX = 0;
-                coordY++;
-            }
+            g.fillRect(colour.xPos * blockWidth, colour.yPos * blockHeight,blockWidth, blockHeight);
         }
     }
 
     private void standard() {
+        int xCoord = 0;
+        int yCoord = 0;
         for (int red = 7; red <= 255; red += 8) {
             for (int green = 7; green <= 255; green += 8) {
                 for (int blue = 7; blue <= 255; blue += 8) {
-                    Color colour = new Color(red, green, blue);
+                    if ((++xCoord) >= 256) {
+                        xCoord = 0;
+                        yCoord++;
+                    }
+                    PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                     colours.add(colour);
                 }
             }
@@ -74,17 +71,27 @@ public class ColourScreen extends JPanel {
     }
 
     private void smooth() {
+        int xCoord = 0;
+        int yCoord = 0;
         for (int red = 7; red <= 255; red += 8) {
             if (greenGradientUp) {
                 for (int green = 7; green <= 255; green += 8) {
                     if (blueGradientUp) {
                         for (int blue = 7; blue <= 255; blue += 8) {
-                            Color colour = new Color(red, green, blue);
+                            if ((++xCoord) >= 256) {
+                                xCoord = 0;
+                                yCoord++;
+                            }
+                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             colours.add(colour);
                         }
                     } else {
                         for (int blue = 255; blue >= 7; blue -= 8) {
-                            Color colour = new Color(red, green, blue);
+                            if ((++xCoord) >= 256) {
+                                xCoord = 0;
+                                yCoord++;
+                            }
+                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             colours.add(colour);
                         }
                     }
@@ -94,12 +101,20 @@ public class ColourScreen extends JPanel {
                 for (int green = 255; green >= 7; green -= 8) {
                     if (blueGradientUp) {
                         for (int blue = 7; blue <= 255; blue += 8) {
-                            Color colour = new Color(red, green, blue);
+                            if ((++xCoord) >= 256) {
+                                xCoord = 0;
+                                yCoord++;
+                            }
+                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             colours.add(colour);
                         }
                     } else {
                         for (int blue = 255; blue >= 7; blue -= 8) {
-                            Color colour = new Color(red, green, blue);
+                            if ((++xCoord) >= 256) {
+                                xCoord = 0;
+                                yCoord++;
+                            }
+                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             colours.add(colour);
                         }
                     }
@@ -115,15 +130,20 @@ public class ColourScreen extends JPanel {
         standard();
         Random randomGenerator = new Random();
         for (int i = 0; i < colours.size(); i++) {
-            Color colour = colours.get(i);
+            PositionedColour colour = colours.get(i);
             int randomIndex = randomGenerator.nextInt(colours.size());
-            Color colourSwapped = colours.get(randomIndex);
-            colours.set(randomIndex, colour);
-            colours.set(i, colourSwapped);
+            int xPosSwapped = colours.get(randomIndex).xPos;
+            int yPosSwapped = colours.get(randomIndex).yPos;
+            colours.get(randomIndex).xPos = colour.xPos;
+            colours.get(randomIndex).yPos = colour.yPos;
+            colours.get(i).xPos = xPosSwapped;
+            colours.get(i).yPos = yPosSwapped;
         }
     }
 
     private void clumpColours() {
+        standard();
+        
         Collections.sort(colours, (colour2, colour1) -> {
             if (colour1.getRed() < colour2.getRed())
                 return -1;
@@ -132,13 +152,14 @@ public class ColourScreen extends JPanel {
             return 1;
         });
 
-        Collections.sort(colours, (colour2, colour1) -> {
-            if (colour1.getBlue() > colour2.getBlue())
-                return -1;
-            if (colour1.getBlue() == colour2.getBlue())
-                return 0;
-            return 1;
-        });
+        Iterator<PositionedColour> iterator = colours.iterator();
+        for (int y = 0; y < 128; y++) {
+            for (int x = 0; x < 256; x++) {
+                PositionedColour colour = iterator.next();
+                colour.xPos = x;
+                colour.yPos = y;
+            }
+        }
     }
 
 
@@ -153,7 +174,7 @@ public class ColourScreen extends JPanel {
         }
     }
 
-    public void switchAlgortithm() {
+    public void switchAlgorithm() {
         colours.clear();
         if (++currentAlgorithm >= NUM_ALGORITHMS)
             currentAlgorithm = 0;
@@ -168,7 +189,6 @@ public class ColourScreen extends JPanel {
                 randomSpread();
                 break;
             case 3:
-                randomSpread();
                 clumpColours();
                 break;
             case 4:

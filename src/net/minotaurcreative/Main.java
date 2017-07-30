@@ -21,7 +21,7 @@ class Main {
                 System.out.println("Key pressed code=" + e.getKeyCode() + ", char=" + e.getKeyChar());
                 switch (e.getKeyCode()) {
                     case 32:
-                        colourScreen.switchAlgortithm();
+                        colourScreen.switchAlgorithm();
                         break;
                     case 38:
                         colourScreen.increaseCycleSpeed();
