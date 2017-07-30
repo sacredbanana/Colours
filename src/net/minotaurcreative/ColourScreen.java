@@ -1,5 +1,7 @@
 package net.minotaurcreative;
 
+import javafx.geometry.Pos;
+
 import java.awt.*;
 import javax.swing.*;
 import java.util.ArrayList;
@@ -9,7 +11,7 @@ import java.util.Random;
 
 public class ColourScreen extends JPanel {
     private final int TOTAL_COLOURS = 32768;
-    private final int NUM_ALGORITHMS = 5;
+    private final int NUM_ALGORITHMS = 6;
     private int currentAlgorithm = 0;
     private int cycle = 0;
     private int cycleSpeed = 0;
@@ -143,7 +145,7 @@ public class ColourScreen extends JPanel {
 
     private void clumpColours() {
         standard();
-        
+
         Collections.sort(colours, (colour2, colour1) -> {
             if (colour1.getRed() < colour2.getRed())
                 return -1;
@@ -162,6 +164,82 @@ public class ColourScreen extends JPanel {
         }
     }
 
+    private void nearestToPrevious() {
+        standard();
+        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS);
+
+        PositionedColour firstColour = colours.remove(0);
+        firstColour.xPos = 0;
+        firstColour.yPos = 0;
+        buffer.add(firstColour);
+
+        while (!colours.isEmpty()) {
+            PositionedColour currentColour = buffer.get(buffer.size()-1);
+            PositionedColour closestColour = nearestColour(currentColour);
+            colours.remove(closestColour);
+            int x = currentColour.xPos;
+            int y = currentColour.yPos;
+            if (++x >= 256) {
+                x = 0;
+                y++;
+            }
+            closestColour.xPos = x;
+            closestColour.yPos = y;
+            buffer.add(closestColour);
+        }
+        colours = buffer;
+    }
+
+    private void nearestToAbove() {
+        standard();
+        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS);
+
+        PositionedColour firstColour = colours.remove(0);
+        firstColour.xPos = 0;
+        firstColour.yPos = 0;
+        buffer.add(firstColour);
+
+        int x = 0;
+        int y = 0;
+
+        while (!colours.isEmpty()) {
+            PositionedColour currentColour;
+            if (y > 0) {
+                currentColour = buffer.get(buffer.size() - 256);
+            } else {
+                currentColour = buffer.get(buffer.size()-1);
+            }
+
+            PositionedColour closestColour = nearestColour(currentColour);
+            colours.remove(closestColour);
+            if (++x >= 256) {
+                x = 0;
+                y++;
+            }
+            closestColour.xPos = x;
+            closestColour.yPos = y;
+            buffer.add(closestColour);
+        }
+        colours = buffer;
+    }
+
+    private PositionedColour nearestColour(PositionedColour originColour) {
+        int minDistance = Integer.MAX_VALUE;
+        PositionedColour closestColour = colours.get(0);
+
+        for (PositionedColour destinationColour : colours) {
+            int redComponent = originColour.getRed() - destinationColour.getRed();
+            int greenComponent = originColour.getGreen() - destinationColour.getGreen();
+            int blueComponent = originColour.getBlue() - destinationColour.getBlue();
+            int distance = redComponent * redComponent + greenComponent * greenComponent + blueComponent * blueComponent;
+            if (distance < minDistance) {
+                closestColour = destinationColour;
+                minDistance = distance;
+            }
+        }
+
+        return closestColour;
+    }
 
     public void increaseCycleSpeed() {
         cycleSpeed++;
@@ -192,8 +270,10 @@ public class ColourScreen extends JPanel {
                 clumpColours();
                 break;
             case 4:
-                standard();
-                clumpColours();
+                nearestToPrevious();
+                break;
+            case 5:
+                nearestToAbove();
                 break;
         }
     }
