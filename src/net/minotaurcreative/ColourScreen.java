@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class ColourScreen extends JPanel {
     private final int TOTAL_COLOURS = 32768;
-    private final int NUM_ALGORITHMS = 6;
+    private final int NUM_ALGORITHMS = 7;
     private int currentAlgorithm = 0;
     private int cycle = 0;
     private int cycleSpeed = 0;
@@ -223,6 +223,49 @@ public class ColourScreen extends JPanel {
         colours = buffer;
     }
 
+    private void nearestToAboveAndBehind() {
+        standard();
+        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS);
+
+        PositionedColour firstColour = colours.remove(0);
+        firstColour.xPos = 0;
+        firstColour.yPos = 0;
+        buffer.add(firstColour);
+
+        int x = 0;
+        int y = 0;
+
+        while (!colours.isEmpty()) {
+            PositionedColour currentColour;
+            PositionedColour currentColour2;
+            if (y > 0) {
+                currentColour = buffer.get(buffer.size() - 256);
+                currentColour2 = buffer.get(buffer.size() - 1);
+                currentColour = averageColour(currentColour, currentColour2);
+            } else {
+                currentColour = buffer.get(buffer.size() - 1);
+            }
+
+            PositionedColour closestColour = nearestColour(currentColour);
+            colours.remove(closestColour);
+            if (++x >= 256) {
+                x = 0;
+                y++;
+            }
+            closestColour.xPos = x;
+            closestColour.yPos = y;
+            buffer.add(closestColour);
+        }
+        colours = buffer;
+    }
+
+    private PositionedColour averageColour(PositionedColour colour1, PositionedColour colour2) {
+        int red = (colour1.getRed() + colour2.getRed()) / 2;
+        int green = (colour1.getGreen() + colour2.getGreen()) / 2;
+        int blue = (colour1.getBlue() + colour2.getBlue()) / 2;
+        return new PositionedColour(red, green, blue, 0, 0);
+    }
+
     private PositionedColour nearestColour(PositionedColour originColour) {
         int minDistance = Integer.MAX_VALUE;
         PositionedColour closestColour = colours.get(0);
@@ -274,6 +317,9 @@ public class ColourScreen extends JPanel {
                 break;
             case 5:
                 nearestToAbove();
+                break;
+            case 6:
+                nearestToAboveAndBehind();
                 break;
         }
     }
