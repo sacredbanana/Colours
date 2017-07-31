@@ -29,6 +29,9 @@ class Main {
                     case 40:
                         colourScreen.decreaseCycleSpeed();
                         break;
+                    case 77:
+                        colourScreen.toggleMenu();
+                        break;
                 }
             }
 
