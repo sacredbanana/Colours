@@ -1,7 +1,5 @@
 package net.minotaurcreative;
 
-import javafx.geometry.Pos;
-
 import java.awt.*;
 import javax.swing.*;
 import java.util.ArrayList;
@@ -9,21 +7,60 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 
+/**
+ * Main drawing class.
+ * @author Cameron Armstrong
+ */
 public class ColourScreen extends JPanel {
+    /**
+     * Total number of colours = 32^3
+     */
     private final int TOTAL_COLOURS = 32768;
+
+    /**
+     * Number of algorithms used
+     */
     private final int NUM_ALGORITHMS = 9;
+
+    /**
+     * Current algorithm being used
+     */
     private int currentAlgorithm = 0;
+
+    /**
+     * Position in colcur cycle
+     */
     private int cycle = 0;
+
+    /**
+     * Speed of colour cycling
+     */
     private int cycleSpeed = 0;
+
+    /**
+     * Menu visibility
+     */
     private boolean menuVisible = true;
-    private boolean processing = false;
+
+    /**
+     * Name of current algorithm
+     */
     private String currentAlgorithmName = "Colour Cube Slice";
+
+    /**
+     * ArrayList containing all colours
+     */
     private ArrayList<PositionedColour> colours;
 
+    /**
+     * Constructor
+     */
     public ColourScreen() {
         colours = new ArrayList<>(TOTAL_COLOURS);
-        standard();
-        Timer timer = new Timer(1, e -> {
+
+        colourCubeSlice(); // Start first algorithm
+
+        Timer timer = new Timer(1, e -> { // Add timer allowing colour cycling animation
             cycle += cycleSpeed;
             if (cycle > 255)
                 cycle = 0;
@@ -32,21 +69,21 @@ public class ColourScreen extends JPanel {
         timer.start();
     }
 
+    /**
+     * Main drawing method
+     * @param g graphics context
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         this.setBackground(Color.BLACK);
 
-        if (processing) {
-            g.clearRect(0,0,getWidth(),getHeight());
-            g.setColor(Color.WHITE);
-            g.drawString("PROCESSING. PLEASE STAND BY", 100,100);
-        }
-
-
-
+        // Draw all colours contained in the ArrayList "colours"
         for (PositionedColour colour : colours) {
+            // Get position
             int coordX = colour.xPos;
             int coordY = colour.yPos;
+
+            // Adjust for colour cycling
             int red = colour.getRed() + cycle;
             if (red > 255)
                 red -= 255;
@@ -58,26 +95,140 @@ public class ColourScreen extends JPanel {
                 blue -= 255;
             Color adjustedColour = new Color(red, green, blue);
             g.setColor(adjustedColour);
-            int blockWidth = 5;//getWidth() / 256;
-            int blockHeight = 6;// getHeight() / 128;// BLOCK_SIZE;
-            g.fillRect(colour.xPos * blockWidth, colour.yPos * blockHeight,blockWidth, blockHeight);
+
+            // Define block size
+            final int BLOCK_WIDTH = 5;
+            final int BLOCK_HEIGHT = 6;
+
+            // Draw block
+            g.fillRect(colour.xPos * BLOCK_WIDTH, colour.yPos * BLOCK_HEIGHT,BLOCK_WIDTH, BLOCK_HEIGHT);
         }
 
+        // Draw menu
         if (menuVisible) {
-            g.setColor(Color.WHITE);
-            g.drawString("Controls: ", 10,20);
-            g.drawString("UP: Increase colour cycle speed", 10,40);
-            g.drawString("DOWN: Decrease colour cycle speed", 10, 60);
-            g.drawString("SPACEBAR: Switch algorithm", 10, 80);
-            g.drawString("M: Show/hide menu", 10, 100);
-            g.drawString("Current Algorithm: " + currentAlgorithmName, 10,120);
+            g.setColor(Color.LIGHT_GRAY);
+            g.fillRect(0,0,getWidth(),20);
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("Serif", Font.BOLD,12));
+            g.drawString("↑: Cycle speed up", 10,14);
+            g.drawString("↓: Cycle speed down", 150, 14);
+            g.drawString("SPACE: Switch algorithm", 330, 14);
+            g.drawString("M: Show/hide menu", 530, 14);
+            g.drawString("Current Algorithm: " + currentAlgorithmName, 730,14);
         }
     }
 
-    private void standard() {
+    /**
+     * Calculates average of 2 colours
+     * @param colour1 first colour
+     * @param colour2 second colour
+     * @return averaged colour
+     */
+    private PositionedColour averageColour(PositionedColour colour1, PositionedColour colour2) {
+        int red = (colour1.getRed() + colour2.getRed()) / 2;
+        int green = (colour1.getGreen() + colour2.getGreen()) / 2;
+        int blue = (colour1.getBlue() + colour2.getBlue()) / 2;
+        return new PositionedColour(red, green, blue, 0, 0);
+    }
+
+    /**
+     * Finds nearest colour to origin colour
+     * @param originColour colour you want the nearest colour to
+     * @return nearest colour
+     */
+    private PositionedColour nearestColour(PositionedColour originColour) {
+        int minDistance = Integer.MAX_VALUE;
+        PositionedColour closestColour = colours.get(0);
+
+        for (PositionedColour destinationColour : colours) {
+            // Calculates distance in colour cube by pythagoras minus the square root step to improve performance
+            int redComponent = originColour.getRed() - destinationColour.getRed();
+            int greenComponent = originColour.getGreen() - destinationColour.getGreen();
+            int blueComponent = originColour.getBlue() - destinationColour.getBlue();
+            int distance = redComponent * redComponent + greenComponent * greenComponent + blueComponent * blueComponent;
+            if (distance < minDistance) {
+                closestColour = destinationColour;
+                minDistance = distance;
+            }
+        }
+
+        return closestColour;
+    }
+
+    /**
+     * Increases colour cycle speed
+     */
+    public void increaseCycleSpeed() {
+        cycleSpeed++;
+    }
+
+    /**
+     * Decreases colour cycle speed
+     */
+    public void decreaseCycleSpeed() {
+        if (--cycleSpeed <=  0) {
+            cycleSpeed = 0;
+            cycle = 0;
+        }
+    }
+
+    /**
+     * Shows/hides menu
+     */
+    public void toggleMenu() {
+        menuVisible = !menuVisible;
+    }
+
+    /**
+     * Switches algorithm
+     */
+    public void switchAlgorithm() {
+        colours.clear();
+        cycleSpeed = 0;
+        cycle = 0;
+        if (++currentAlgorithm >= NUM_ALGORITHMS)
+            currentAlgorithm = 0;
+        switch (currentAlgorithm) {
+            case 0:
+                colourCubeSlice();
+                break;
+            case 1:
+                smooth();
+                break;
+            case 2:
+                randomSpread();
+                break;
+            case 3:
+                clumpColours();
+                break;
+            case 4:
+                nearestToPrevious();
+                break;
+            case 5:
+                nearestToAbove();
+                break;
+            case 6:
+                nearestToAboveAndPrevious();
+                break;
+            case 7:
+                nearestToAllThreeAbove();
+                break;
+            case 8:
+                nearestToAllThreeAboveAndPrevious();
+                break;
+        }
+    }
+
+    /**
+     * ALGORITHM: Colour Cube Slice
+     * Colours added by slicing colour cube
+     */
+    private void colourCubeSlice() {
         currentAlgorithmName = "Colour Cube Slice";
+
         int xCoord = 0;
         int yCoord = 0;
+
         for (int red = 7; red <= 255; red += 8) {
             for (int green = 7; green <= 255; green += 8) {
                 for (int blue = 7; blue <= 255; blue += 8) {
@@ -92,12 +243,18 @@ public class ColourScreen extends JPanel {
         }
     }
 
+    /**
+     * ALGORITHM Colour Cube Slice with Smoothing
+     * Same as Colour Cube Slice but the colours alternate directions for a smoother appearance
+     */
     private void smooth() {
         currentAlgorithmName = "Colour Cube Slice with Smoothing";
+
         int xCoord = 0;
         int yCoord = 0;
         boolean blueGradientUp = true;
         boolean greenGradientUp = true;
+
         for (int red = 7; red <= 255; red += 8) {
             if (greenGradientUp) {
                 for (int green = 7; green <= 255; green += 8) {
@@ -150,10 +307,16 @@ public class ColourScreen extends JPanel {
         }
     }
 
+    /**
+     * ALGORITHM: Random Spread
+     * Distributes all colours randomly
+     */
     private void randomSpread() {
-        standard();
+        colourCubeSlice();
+
         currentAlgorithmName = "Random Spread";
         Random randomGenerator = new Random();
+
         for (int i = 0; i < colours.size(); i++) {
             PositionedColour colour = colours.get(i);
             int randomIndex = randomGenerator.nextInt(colours.size());
@@ -166,10 +329,15 @@ public class ColourScreen extends JPanel {
         }
     }
 
+    /**
+     * ALGORITHM: Colour Cube Slice with Red Accumulation
+     * Same as Colour Cube Slice but gets the red most colours first
+     */
     private void clumpColours() {
-        standard();
+        colourCubeSlice();
         currentAlgorithmName = "Colour Cube Slice with Red Accumulation";
 
+        // Sort by redness
         Collections.sort(colours, (colour2, colour1) -> {
             if (colour1.getRed() < colour2.getRed())
                 return -1;
@@ -178,6 +346,7 @@ public class ColourScreen extends JPanel {
             return 1;
         });
 
+        // Update positions
         Iterator<PositionedColour> iterator = colours.iterator();
         for (int y = 0; y < 128; y++) {
             for (int x = 0; x < 256; x++) {
@@ -188,10 +357,15 @@ public class ColourScreen extends JPanel {
         }
     }
 
+    /**
+     * ALGORITHM: Nearest Colour to Previous Block
+     * The next colour picked is the closest colour to the block to the left
+     */
     private void nearestToPrevious() {
-        standard();
-        currentAlgorithmName = "Nearest Colour to Previous Pixel";
-        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS);
+        colourCubeSlice();
+        currentAlgorithmName = "Nearest Colour to Previous Block";
+
+        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS); // Buffer to store new colours
 
         PositionedColour firstColour = colours.remove(0);
         firstColour.xPos = 0;
@@ -215,10 +389,14 @@ public class ColourScreen extends JPanel {
         colours = buffer;
     }
 
+    /**
+     * ALGORITHM: Nearest Colour to Block Above
+     * The next colour picked is the closest colour to the block above
+     */
     private void nearestToAbove() {
-        standard();
-        currentAlgorithmName = "Nearest Colour to Pixel Above";
-        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS);
+        colourCubeSlice();
+        currentAlgorithmName = "Nearest Colour to Block Above";
+        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS); // Buffer to store new colours
 
         PositionedColour firstColour = colours.remove(0);
         firstColour.xPos = 0;
@@ -249,10 +427,14 @@ public class ColourScreen extends JPanel {
         colours = buffer;
     }
 
+    /**
+     * ALGORITHM: Nearest Colour to Both Above and Previous Blocks
+     * The next colour picked is the closest colour to the average of the blocks to the left and above
+     */
     private void nearestToAboveAndPrevious() {
-        standard();
-        currentAlgorithmName = "Nearest Colour to Both Above and Previous Pixels";
-        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS);
+        colourCubeSlice();
+        currentAlgorithmName = "Nearest Colour to Both Above and Previous Blocks";
+        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS); // Buffer to store new colours
 
         PositionedColour firstColour = colours.remove(0);
         firstColour.xPos = 0;
@@ -286,10 +468,14 @@ public class ColourScreen extends JPanel {
         colours = buffer;
     }
 
+    /**
+     * ALGORITHM: Nearest Colour to All Three Blocks Above
+     * The next colour picked is the closest colour to the average of all 3 blocks above
+     */
     private void nearestToAllThreeAbove() {
-        standard();
-        currentAlgorithmName = "Nearest Colour to All Three Pixels Above";
-        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS);
+        colourCubeSlice();
+        currentAlgorithmName = "Nearest Colour to All Three Blocks Above";
+        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS); // Buffer to store new colours
 
         PositionedColour firstColour = colours.remove(0);
         firstColour.xPos = 0;
@@ -329,10 +515,14 @@ public class ColourScreen extends JPanel {
         colours = buffer;
     }
 
+    /**
+     * ALGORITHM: Nearest Colour to All Three Pixels Above Plus Previous
+     * The next colour picked is the closest colour to the average of all 3 blocks above and the one to the left
+     */
     private void nearestToAllThreeAboveAndPrevious() {
-        standard();
+        colourCubeSlice();
         currentAlgorithmName = "Nearest Colour to All Three Pixels Above Plus Previous";
-        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS);
+        ArrayList<PositionedColour> buffer = new ArrayList<>(TOTAL_COLOURS); // Buffer to store new colours
 
         PositionedColour firstColour = colours.remove(0);
         firstColour.xPos = 0;
@@ -368,84 +558,5 @@ public class ColourScreen extends JPanel {
             buffer.add(closestColour);
         }
         colours = buffer;
-    }
-
-    private PositionedColour averageColour(PositionedColour colour1, PositionedColour colour2) {
-        int red = (colour1.getRed() + colour2.getRed()) / 2;
-        int green = (colour1.getGreen() + colour2.getGreen()) / 2;
-        int blue = (colour1.getBlue() + colour2.getBlue()) / 2;
-        return new PositionedColour(red, green, blue, 0, 0);
-    }
-
-    private PositionedColour nearestColour(PositionedColour originColour) {
-        int minDistance = Integer.MAX_VALUE;
-        PositionedColour closestColour = colours.get(0);
-
-        for (PositionedColour destinationColour : colours) {
-            int redComponent = originColour.getRed() - destinationColour.getRed();
-            int greenComponent = originColour.getGreen() - destinationColour.getGreen();
-            int blueComponent = originColour.getBlue() - destinationColour.getBlue();
-            int distance = redComponent * redComponent + greenComponent * greenComponent + blueComponent * blueComponent;
-            if (distance < minDistance) {
-                closestColour = destinationColour;
-                minDistance = distance;
-            }
-        }
-
-        return closestColour;
-    }
-
-    public void increaseCycleSpeed() {
-        cycleSpeed++;
-    }
-
-    public void decreaseCycleSpeed() {
-        if (--cycleSpeed <=  0) {
-            cycleSpeed = 0;
-            cycle = 0;
-        }
-    }
-
-    public void toggleMenu() {
-        menuVisible = !menuVisible;
-    }
-
-    public void switchAlgorithm() {
-        colours.clear();
-        cycleSpeed = 0;
-        cycle = 0;
-        processing = true;
-        if (++currentAlgorithm >= NUM_ALGORITHMS)
-            currentAlgorithm = 0;
-        switch (currentAlgorithm) {
-            case 0:
-                standard();
-                break;
-            case 1:
-                smooth();
-                break;
-            case 2:
-                randomSpread();
-                break;
-            case 3:
-                clumpColours();
-                break;
-            case 4:
-                nearestToPrevious();
-                break;
-            case 5:
-                nearestToAbove();
-                break;
-            case 6:
-                nearestToAboveAndPrevious();
-                break;
-            case 7:
-                nearestToAllThreeAbove();
-                break;
-            case 8:
-                nearestToAllThreeAboveAndPrevious();
-                break;
-        }
-        processing = false;
     }
 }
