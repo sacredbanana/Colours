@@ -14,6 +14,8 @@ class Main {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ColourScreen colourScreen = new ColourScreen();
         frame.add(colourScreen);
+
+        // Make frame respond to keyboard presses
         frame.addKeyListener(new KeyListener() {
             public void keyTyped(KeyEvent e) {}
 
