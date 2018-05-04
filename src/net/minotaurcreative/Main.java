@@ -8,7 +8,7 @@ class Main {
 
     public static void main(String[] args) {
         final int SCREEN_WIDTH = 1280;
-        final int SCREEN_HEIGHT = 800;
+        final int SCREEN_HEIGHT = 640;
         JFrame frame = new JFrame("Colours!");
         frame.setResizable(false);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

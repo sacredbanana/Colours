@@ -98,7 +98,7 @@ public class ColourScreen extends JPanel {
 
             // Define block size
             final int BLOCK_WIDTH = 5;
-            final int BLOCK_HEIGHT = 6;
+            final int BLOCK_HEIGHT = 5;
 
             // Draw block
             g.fillRect(colour.xPos * BLOCK_WIDTH, colour.yPos * BLOCK_HEIGHT,BLOCK_WIDTH, BLOCK_HEIGHT);
@@ -229,14 +229,14 @@ public class ColourScreen extends JPanel {
         int xCoord = 0;
         int yCoord = 0;
 
-        for (int red = 7; red <= 255; red += 8) {
-            for (int green = 7; green <= 255; green += 8) {
-                for (int blue = 7; blue <= 255; blue += 8) {
+        for (int red = 0; red < 256; red += 8) {
+            for (int green = 0; green < 256; green += 8) {
+                for (int blue = 0; blue < 256; blue += 8) {
+                    PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                     if ((++xCoord) >= 256) {
                         xCoord = 0;
                         yCoord++;
                     }
-                    PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                     colours.add(colour);
                 }
             }
@@ -255,48 +255,48 @@ public class ColourScreen extends JPanel {
         boolean blueGradientUp = true;
         boolean greenGradientUp = true;
 
-        for (int red = 7; red <= 255; red += 8) {
+        for (int red = 0; red < 256; red += 8) {
             if (greenGradientUp) {
-                for (int green = 7; green <= 255; green += 8) {
+                for (int green = 0; green < 256; green += 8) {
                     if (blueGradientUp) {
-                        for (int blue = 7; blue <= 255; blue += 8) {
+                        for (int blue = 0; blue < 256; blue += 8) {
+                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             if ((++xCoord) >= 256) {
                                 xCoord = 0;
                                 yCoord++;
                             }
-                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             colours.add(colour);
                         }
                     } else {
-                        for (int blue = 255; blue >= 7; blue -= 8) {
+                        for (int blue = 248; blue >= 0; blue -= 8) {
+                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             if ((++xCoord) >= 256) {
                                 xCoord = 0;
                                 yCoord++;
                             }
-                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             colours.add(colour);
                         }
                     }
                     blueGradientUp = !blueGradientUp;
                 }
             } else {
-                for (int green = 255; green >= 7; green -= 8) {
+                for (int green = 248; green >= 0; green -= 8) {
                     if (blueGradientUp) {
-                        for (int blue = 7; blue <= 255; blue += 8) {
+                        for (int blue = 0; blue < 256; blue += 8) {
+                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             if ((++xCoord) >= 256) {
                                 xCoord = 0;
                                 yCoord++;
                             }
-                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             colours.add(colour);
                         }
                     } else {
-                        for (int blue = 255; blue >= 7; blue -= 8) {
+                        for (int blue = 248; blue >= 0; blue -= 8) {
+                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             if ((++xCoord) >= 256) {
                                 xCoord = 0;
                                 yCoord++;
                             }
-                            PositionedColour colour = new PositionedColour(red, green, blue, xCoord, yCoord);
                             colours.add(colour);
                         }
                     }
