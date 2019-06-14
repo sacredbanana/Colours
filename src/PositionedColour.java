@@ -1,5 +1,3 @@
-package net.minotaurcreative;
-
 import java.awt.*;
 
 /**
